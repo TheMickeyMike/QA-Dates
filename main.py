@@ -1,47 +1,50 @@
-import wikipedia
 import re
 import sys
+import nltk
+import wikipedia
 from wolfram_client import AskWolfram
 
-pattern_pl = "ur. (([0-9]{1,2}\D*[0-9]{4}.*?)(,.zm|\)))"
-pattern_pl_2 = "ur. ([0-9]{1,2}\D*[0-9]{4}.*?)(\) –|-)"
-name = input("Kiedy urodził się ")
 
-# Let's try in polish, maybe famous?
-print (wikipedia.languages()['pl'])
-wikipedia.set_lang("pl")
+class SentenceParser():
+    def parse(sentence):
+        name = ''
+        entities = nltk.chunk.ne_chunk(nltk.pos_tag(nltk.word_tokenize(sentence)))
+        for st in entities.subtrees(filter=lambda x: x.label() == "PERSON"):
+            for leave in st.leaves():
+                name = name + leave[0] + ' '
+        return name
 
-# result_pl = wikipedia.summary(name)
-# print(result_pl)
-# print(result.group(1).strip())
 
-result_pl = ""
-result_en = ""
-try:
-    result_pl = wikipedia.summary(name)
-except wikipedia.exceptions.DisambiguationError as e:
+def wiki_parser(text):
+    # Patterns
+    # pattern_pl = "ur. (([0-9]{1,2}\D*[0-9]{4}.*?)(,.zm|\)))"
+    pattern_pl = "ur. ([0-9]{1,2}\D*[0-9]{4}.*?)(\) –|-)"
+    return re.search(pattern_pl, text).group(1)
+
+def wiki_search(name):
+    wikipedia.set_lang("pl")
+    result_pl = ''
     try:
-        # Let's try in eng
-        wikipedia.set_lang("en")
-        result_en = wikipedia.summary(name)
-    except wikipedia.exceptions.DisambiguationError as ee:
-        print (e.options)
-        print(ee.options)
+        result_pl = wikipedia.summary(name)
+    except wikipedia.exceptions.DisambiguationError as e:
         sys.exit("Search Error!")
-if result_pl != "":
-    result = re.search(pattern_pl_2,result_pl)
-    # print(result_pl)
-    print(result.group(1))
-elif result_en != "":
-    result = re.search(pattern_pl,result_pl) #TODO Tu inny pattern
-    print(result.group(1))
+    return wiki_parser(result_pl)
 
-# print (wikipedia.summary(name))
+def wolfram_search(name):
+    print('\n******* WolframAlpha Result *******\n')
+    wolfram = AskWolfram(name)
+    wolfram.start()
 
-re.search(pattern_pl,result_pl)
-# print (wikipedia.search("Madonna (entertainer)"))
+def main():
+    sentence = input('Hey, please ask me a question.\n')
+    name = SentenceParser.parse(sentence)
+    print('Ok, this is what i found.\n' + wiki_search(name))
+    wolfram_search(name)
 
-# Print wolfram
-print('\n******* WolframAlpha Result *******\n')
-wolfram = AskWolfram(name)
-wolfram.start()
+
+# start program
+main()
+
+
+
+

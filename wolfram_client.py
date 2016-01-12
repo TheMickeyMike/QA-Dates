@@ -6,7 +6,6 @@ class AskWolfram():
     __person = ""
     __app_id = 'TAHKHP-UR2RGWHQV9'
 
-
     def __init__(self,name):
         self.__person = name
 
@@ -30,8 +29,8 @@ class AskWolfram():
                         print("Miejsce śmierci:" + str(x.split('|')[1]))
 
             elif pod.title == 'Input interpretation':
-                print("Osoba:" + pod.text)
+                print("Osoba: " + pod.text)
 
-#     print(groups)
-#  print(str(pod.title) + "  " + str(pod.text))
+# print(groups)
+# print(str(pod.title) + "  " + str(pod.text))
 # print(next(res.results).text)
