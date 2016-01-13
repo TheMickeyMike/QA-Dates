@@ -15,36 +15,51 @@ class SentenceParser():
         return name
 
 
-def wiki_parser(text):
-    # Patterns
-    # pattern_pl = "ur. (([0-9]{1,2}\D*[0-9]{4}.*?)(,.zm|\)))"
-    pattern_pl = "ur. ([0-9]{1,2}\D*[0-9]{4}.*?)(\) –|-)"
-    return re.search(pattern_pl, text).group(1)
+def get_pattern(language):
+    return {
+        'pl': 'ur. ([0-9]{1,2}\D*[0-9]{4}.*?)(\) –|-)',
+        'en': '\((.*;)?(.*?)\)',
+    }.get(language, 'error')
 
-def wiki_search(name):
-    wikipedia.set_lang("pl")
-    result_pl = ''
+
+def wiki_parser(text, language):
+    pattern = get_pattern(language)
+    if language == 'pl':
+        return re.search(pattern, text).group(1).split(',')
+    elif language == 'en':
+        return re.search(pattern, text).group(2).split('–')
+
+
+def wiki_search(name, language='pl'):
+    wikipedia.set_lang(language)
+    result = ''
     try:
-        result_pl = wikipedia.summary(name)
+        result = wikipedia.summary(name)
     except wikipedia.exceptions.DisambiguationError as e:
         sys.exit("Search Error!")
-    return wiki_parser(result_pl)
+    return wiki_parser(result, language)
+
 
 def wolfram_search(name):
     print('\n******* WolframAlpha Result *******\n')
     wolfram = AskWolfram(name)
     wolfram.start()
 
+
 def main():
     sentence = input('Hey, please ask me a question.\n')
     name = SentenceParser.parse(sentence)
-    print('Ok, this is what i found.\n' + wiki_search(name))
+    print('Ok, this is what i found for ' + name.strip() + '.\n')
+    # result = wiki_search(name, 'en') # EN
+    result = wiki_search(name) # PL
+    if len(result) > 1:
+        print('Born: ' + str(result[0]).strip())
+        print('Death: ' + str(result[1])[4:].strip())
+    else:
+        print('Born: ' + str(result[0]))
+
     wolfram_search(name)
 
 
 # start program
 main()
-
-
-
-
