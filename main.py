@@ -30,13 +30,28 @@ def wiki_parser(text, language):
         return re.search(pattern, text).group(2).split('–')
 
 
+def wiki_helper(name):
+    try:
+        result = wikipedia.summary(name)
+    except wikipedia.exceptions.DisambiguationError as e:
+        sys.exit("Search Error!")
+    return result
+
 def wiki_search(name, language='pl'):
     wikipedia.set_lang(language)
     result = ''
     try:
         result = wikipedia.summary(name)
     except wikipedia.exceptions.DisambiguationError as e:
-        sys.exit("Search Error!")
+        print (e.options)
+        for record in e.options:
+            if name in record:
+                print(record)
+                result = wiki_helper(record)
+                break
+                # return wiki_parser(result, language)
+        pass
+        # sys.exit("Search Error!")
     return wiki_parser(result, language)
 
 
@@ -47,16 +62,23 @@ def wolfram_search(name):
 
 
 def main():
+    language = 'en'
     sentence = input('Hey, please ask me a question.\n')
     name = SentenceParser.parse(sentence)
     print('Ok, this is what i found for ' + name.strip() + '.\n')
-    # result = wiki_search(name, 'en') # EN
-    result = wiki_search(name) # PL
-    if len(result) > 1:
-        print('Born: ' + str(result[0]).strip())
-        print('Death: ' + str(result[1])[4:].strip())
-    else:
-        print('Born: ' + str(result[0]))
+    result = wiki_search(name,language)
+    if language == 'en':
+        if len(result) > 1:
+            print('Born: ' + str(result[0]).strip())
+            print('Death: ' + str(result[1]).strip())
+        else:
+            print('Born: ' + str(result[0]))
+    else: #PL
+        if len(result) > 1:
+            print('Data Urodzenia: ' + str(result[0]).strip())
+            print('Data Śmierci: ' + str(result[1])[4:].strip())
+        else:
+            print('Data Urodzenia: ' + str(result[0]))
 
     wolfram_search(name)
 
