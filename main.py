@@ -62,10 +62,10 @@ def wolfram_search(name):
 
 
 def main():
-    language = 'en'
+    language = 'pl'
     sentence = input('Hey, please ask me a question.\n')
     name = SentenceParser.parse(sentence)
-    print('Ok, this is what i found for ' + name.strip() + '.\n')
+    print('Ok, here is what i found for ' + name.strip() + '.\n')
     result = wiki_search(name,language)
     if language == 'en':
         if len(result) > 1:
